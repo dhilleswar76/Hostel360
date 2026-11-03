@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
 import { getDatabaseStatus } from "./config/database.js";
 import authRouter from "./routes/auth.js";
 import accessRouter from "./routes/access.js";
@@ -59,6 +62,17 @@ app.use("/api/feedback", feedbackRouter);
 app.use("/api/messages", messagesRouter);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/reports", reportsRouter);
+
+// Serve frontend build in production if available
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const frontendDist = path.resolve(__dirname, "../../frontend/dist");
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    res.sendFile(path.join(frontendDist, "index.html"));
+  });
+}
 
 // Centralized error handling
 app.use((error, _req, res, _next) => errorResponse(error, res));
