@@ -1,0 +1,17 @@
+{
+  "name": "hostel360",
+  "version": "2.0.0",
+  "private": true,
+  "description": "HOSTEL360 - Smart Hostel Management System (MERN Stack)",
+  "scripts": {
+    "frontend": "npm --prefix frontend run dev",
+    "backend": "npm --prefix backend run dev",
+    "dev": "concurrently -k -n frontend,backend -c cyan,green \"npm:frontend\" \"npm:backend\"",
+    "build": "npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed",
+    "start": "npm --prefix backend run start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
