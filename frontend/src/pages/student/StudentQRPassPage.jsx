@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import QRCode from "qrcode";
 import api, { getApiError } from "../../lib/api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { LoadingState, Panel, SectionHeading } from "../../components/Common.jsx";
@@ -7,6 +8,7 @@ import { Icon } from "../../components/Icon.jsx";
 export function StudentQRPassPage() {
   const { user } = useAuth();
   const [activePass, setActivePass] = useState(null);
+  const [qrDataUrl, setQrDataUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -18,6 +20,20 @@ export function StudentQRPassPage() {
       const res = await api.get("/leaves", { params: { status: "approved" } });
       const approvedWithPass = (res.data?.data || []).find((l) => l.qrPass && l.qrPass.status === "active");
       setActivePass(approvedWithPass || null);
+
+      if (approvedWithPass?.qrPass?.token) {
+        const url = await QRCode.toDataURL(approvedWithPass.qrPass.token, {
+          width: 260,
+          margin: 1,
+          color: {
+            dark: "#0f172a",
+            light: "#ffffff",
+          },
+        });
+        setQrDataUrl(url);
+      } else {
+        setQrDataUrl("");
+      }
     } catch (err) {
       setError(getApiError(err, "Failed to load active QR pass."));
     } finally {
@@ -56,53 +72,31 @@ export function StudentQRPassPage() {
             {activePass.leaveType?.replace("_", " ")} PASS
           </p>
 
-          {/* Stylized QR Code Graphic Container */}
-          <div className="p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 max-w-xs mx-auto flex flex-col items-center justify-center">
-            <svg
-              className="w-48 h-48 text-slate-900"
-              viewBox="0 0 100 100"
-              fill="currentColor"
-            >
-              {/* Corner position locators */}
-              <rect x="5" y="5" width="28" height="28" fill="currentColor" rx="2" />
-              <rect x="9" y="9" width="20" height="20" fill="white" rx="1" />
-              <rect x="13" y="13" width="12" height="12" fill="currentColor" rx="1" />
-
-              <rect x="67" y="5" width="28" height="28" fill="currentColor" rx="2" />
-              <rect x="71" y="9" width="20" height="20" fill="white" rx="1" />
-              <rect x="75" y="13" width="12" height="12" fill="currentColor" rx="1" />
-
-              <rect x="5" y="67" width="28" height="28" fill="currentColor" rx="2" />
-              <rect x="9" y="71" width="20" height="20" fill="white" rx="1" />
-              <rect x="13" y="75" width="12" height="12" fill="currentColor" rx="1" />
-
-              {/* Data matrix pattern mock */}
-              <rect x="38" y="10" width="8" height="8" />
-              <rect x="50" y="10" width="8" height="8" />
-              <rect x="42" y="22" width="6" height="6" />
-              <rect x="52" y="22" width="6" height="6" />
-              <rect x="10" y="38" width="6" height="6" />
-              <rect x="22" y="38" width="8" height="8" />
-              <rect x="38" y="38" width="12" height="12" />
-              <rect x="55" y="38" width="8" height="8" />
-              <rect x="70" y="38" width="6" height="6" />
-              <rect x="82" y="38" width="8" height="8" />
-
-              <rect x="38" y="55" width="8" height="8" />
-              <rect x="50" y="55" width="8" height="8" />
-              <rect x="70" y="55" width="12" height="6" />
-              <rect x="10" y="55" width="6" height="6" />
-
-              <rect x="38" y="70" width="8" height="8" />
-              <rect x="50" y="70" width="8" height="8" />
-              <rect x="70" y="70" width="6" height="12" />
-              <rect x="82" y="70" width="8" height="8" />
-              <rect x="42" y="82" width="6" height="6" />
-              <rect x="55" y="82" width="8" height="8" />
-            </svg>
-            <div className="mt-3 font-mono text-xs bg-white px-2 py-1 rounded border border-slate-300 text-slate-800 break-all select-all">
+          {/* Real Scannable QR Code Container */}
+          <div className="p-5 bg-white rounded-2xl border-2 border-slate-200 shadow-inner max-w-xs mx-auto flex flex-col items-center justify-center">
+            {qrDataUrl ? (
+              <img
+                src={qrDataUrl}
+                alt="Student Gate QR Pass"
+                className="w-56 h-56 object-contain rounded-lg shadow-sm"
+              />
+            ) : (
+              <div className="w-56 h-56 flex items-center justify-center bg-slate-100 rounded-lg text-slate-400">
+                <Icon name="QrCode" size={48} />
+              </div>
+            )}
+            <div className="mt-3 font-mono text-xs bg-slate-50 px-3 py-1.5 rounded border border-slate-300 text-slate-800 break-all select-all font-bold">
               {activePass.qrPass.token}
             </div>
+            {qrDataUrl && (
+              <a
+                href={qrDataUrl}
+                download={`HOSTEL360-Pass-${activePass.qrPass.token.slice(0, 10)}.png`}
+                className="mt-3 text-xs text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center gap-1.5"
+              >
+                <Icon name="Download" size={13} /> Download Pass Image
+              </a>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs text-left bg-slate-50 p-4 rounded-xl border border-slate-200">

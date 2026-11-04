@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api, { getApiError } from "../../lib/api.js";
 import { DataTable, LoadingState, Modal, Panel, SectionHeading, StatusBadge } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { QRCameraModal } from "../../components/QRCameraModal.jsx";
 
 export function GateManagementPage() {
   const [statusData, setStatusData] = useState({ totalStudents: 0, insideCount: 0, outsideCount: 0, insideStudents: [], outsideStudents: [] });
@@ -15,6 +16,7 @@ export function GateManagementPage() {
   const [verifyResult, setVerifyResult] = useState(null);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyError, setVerifyError] = useState("");
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
 
   // Record movement state
   const [movementStudentId, setMovementStudentId] = useState("");
@@ -44,14 +46,15 @@ export function GateManagementPage() {
     loadGateData();
   }, []);
 
-  async function handleVerifyToken(e) {
-    e.preventDefault();
-    if (!tokenInput.trim()) return;
+  async function verifyPassToken(rawToken) {
+    const token = String(rawToken || "").trim();
+    if (!token) return;
+    setTokenInput(token);
     setVerifyLoading(true);
     setVerifyError("");
     setVerifyResult(null);
     try {
-      const res = await api.post("/gate/verify-pass", { token: tokenInput.trim() });
+      const res = await api.post("/gate/verify-pass", { token });
       setVerifyResult(res.data);
       if (res.data?.pass?.student?._id) {
         setMovementStudentId(res.data.pass.student._id);
@@ -61,6 +64,11 @@ export function GateManagementPage() {
     } finally {
       setVerifyLoading(false);
     }
+  }
+
+  async function handleVerifyToken(e) {
+    e.preventDefault();
+    verifyPassToken(tokenInput);
   }
 
   async function handleRecordMovement(e) {
@@ -184,19 +192,33 @@ export function GateManagementPage() {
 
       {/* Gate Verification & Pass Processing Form */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Panel title="Scan / Verify QR Pass Token" subtitle="Enter student pass token generated during leave approval">
+        <Panel
+          title="Scan / Verify Gate QR Pass"
+          subtitle="Scan student digital pass with camera or enter security token"
+          action={
+            <button
+              type="button"
+              className="primary-action inline-flex items-center gap-2"
+              onClick={() => setCameraModalOpen(true)}
+              style={{ background: "#2563eb", borderColor: "#2563eb" }}
+            >
+              <Icon name="Camera" size={16} />
+              <span>Scan with Camera</span>
+            </button>
+          }
+        >
           <form onSubmit={handleVerifyToken} className="space-y-3">
             <div className="flex gap-2">
               <input
                 type="text"
                 className="flex-1 p-2 border border-slate-300 rounded font-mono text-sm"
-                placeholder="e.g. PASS-1718000000-A1B2C3D4..."
+                placeholder="Or enter pass token (e.g. PASS-1718000000...)"
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
               />
-              <button type="submit" className="button primary flex items-center gap-2" disabled={verifyLoading}>
+              <button type="submit" className="outline-button inline-flex items-center gap-1.5" disabled={verifyLoading}>
                 <Icon name="QrCode" size={16} />
-                {verifyLoading ? "Checking…" : "Verify Pass"}
+                {verifyLoading ? "Checking…" : "Verify"}
               </button>
             </div>
             {verifyError && <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded text-xs">{verifyError}</div>}
@@ -316,6 +338,13 @@ export function GateManagementPage() {
       <Panel title="Recent Gate Movements">
         <DataTable columns={movementColumns} rows={movements} />
       </Panel>
+
+      {/* Live Camera QR Scanner Modal */}
+      <QRCameraModal
+        isOpen={cameraModalOpen}
+        onClose={() => setCameraModalOpen(false)}
+        onScanSuccess={verifyPassToken}
+      />
     </div>
   );
 }
