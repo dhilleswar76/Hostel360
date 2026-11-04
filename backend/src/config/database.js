@@ -14,8 +14,8 @@ export async function connectDatabase(uri = process.env.MONGODB_URI) {
     if (targetUri && process.env.USE_MEMORY_DB !== "true") {
       try {
         const instance = await mongoose.connect(targetUri, {
-          serverSelectionTimeoutMS: Number(process.env.MONGODB_SERVER_SELECTION_TIMEOUT_MS) || 2_500,
-          connectTimeoutMS: Number(process.env.MONGODB_CONNECT_TIMEOUT_MS) || 2_500,
+          serverSelectionTimeoutMS: Number(process.env.MONGODB_SERVER_SELECTION_TIMEOUT_MS) || 10_000,
+          connectTimeoutMS: Number(process.env.MONGODB_CONNECT_TIMEOUT_MS) || 10_000,
           maxPoolSize: Number(process.env.MONGODB_MAX_POOL_SIZE) || 10,
           minPoolSize: 0,
           autoIndex: true,
