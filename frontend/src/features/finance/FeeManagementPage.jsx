@@ -128,7 +128,7 @@ export function FeeManagementPage() {
       });
       await load();
     } catch (e) {
-      setError(getApiError(e, "Simulated payment failed."));
+      setError(getApiError(e, "Payment failed."));
     } finally {
       setSaving(false);
     }
@@ -220,7 +220,7 @@ export function FeeManagementPage() {
   const cards = summary
     ? [
         { label: "Total fees", value: money(summary.totalFees), change: `${summary.recordCount} fee records`, tone: "blue", icon: "WalletCards" },
-        { label: "Collected", value: money(summary.collectedFees), change: "Simulated payments received", tone: "green", icon: "CircleDollarSign" },
+        { label: "Collected", value: money(summary.collectedFees), change: "Total payments collected", tone: "green", icon: "CircleDollarSign" },
         { label: "Pending balance", value: money(summary.pendingFees), change: "Outstanding balances", tone: "amber", icon: "Clock" },
         { label: "Overdue balance", value: money(summary.overdueFees), change: "Past scheduled due date", tone: "rose", icon: "CircleAlert" },
       ]
@@ -232,7 +232,7 @@ export function FeeManagementPage() {
         title={isStudent ? "My Fee Details" : "Fee Management"}
         subtitle={
           isStudent
-            ? "Review hostel & mess fees, download payment receipts, and make simulated payments."
+            ? "Review hostel & mess fees, download payment receipts, and pay fees online."
             : "Assign hostel fees, track collection rates, and review student balances."
         }
         action={
@@ -301,7 +301,7 @@ export function FeeManagementPage() {
       )}
 
       {loading ? (
-        <LoadingState label="Loading fee records from MongoDB…" />
+        <LoadingState label="Loading fee records…" />
       ) : rows.length ? (
         <section className="panel management-table-panel">
           <div className="management-table-heading">
@@ -309,9 +309,6 @@ export function FeeManagementPage() {
               <h3>{isStudent ? "My Fee Records" : "Hostel Fee Ledger"}</h3>
               <p>{rows.length} fee records listed</p>
             </div>
-            <span className="live-data-chip">
-              <i /> Live MongoDB
-            </span>
           </div>
           <DataTable columns={columns} rows={rows} />
         </section>
@@ -386,17 +383,14 @@ export function FeeManagementPage() {
         </Modal>
       )}
 
-      {/* Simulated Payment Modal */}
+      {/* Online Payment Modal */}
       {paying && (
         <Modal
-          title="Make Simulated Payment"
-          subtitle={`Pay ${paying.feeType?.toUpperCase()} · Outstanding balance: ${money(paying.balance)}. Note: This is an educational simulation; no real money is deducted.`}
+          title="Make Online Payment"
+          subtitle={`Pay ${paying.feeType?.toUpperCase()} · Outstanding balance: ${money(paying.balance)}`}
           onClose={() => setPaying(null)}
         >
           <form className="modal-form" onSubmit={pay}>
-            <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", padding: "12px", borderRadius: "8px", fontSize: "13px", color: "#1e40af", marginBottom: "12px" }}>
-              <strong>Simulated Transaction:</strong> This online payment will update MongoDB and generate a valid payment receipt instantly.
-            </div>
             <label>
               Payment amount (₹)
               <input name="amount" type="number" min="1" max={paying.balance} step="1" defaultValue={paying.balance} required />
@@ -404,9 +398,9 @@ export function FeeManagementPage() {
             <label>
               Payment channel
               <select name="method">
-                <option value="upi">UPI / QR Simulation</option>
-                <option value="card">Debit / Credit Card Simulation</option>
-                <option value="bank">Net Banking Simulation</option>
+                <option value="upi">UPI / QR Code</option>
+                <option value="card">Debit / Credit Card</option>
+                <option value="bank">Net Banking</option>
               </select>
             </label>
             <div className="modal-actions">
@@ -425,7 +419,7 @@ export function FeeManagementPage() {
       {receipt && (
         <Modal
           title="HOSTEL360 Payment Receipt"
-          subtitle="Official Payment Acknowledgment (Simulated)"
+          subtitle="Official Payment Acknowledgment"
           onClose={() => setReceipt(null)}
         >
           <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "8px", border: "1px dashed #cbd5e1", fontSize: "13px" }}>
@@ -452,7 +446,7 @@ export function FeeManagementPage() {
               </div>
               <div>
                 <span>Payment Mode</span>
-                <strong>{receipt.method?.toUpperCase()} (Simulated)</strong>
+                <strong>{receipt.method?.toUpperCase()}</strong>
               </div>
               <div>
                 <span>Date & Time</span>

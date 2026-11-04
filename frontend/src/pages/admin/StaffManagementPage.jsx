@@ -211,7 +211,7 @@ export function StaffManagementPage() {
       </div>
 
       {loading ? (
-        <LoadingState label="Loading staff accounts from MongoDB…" />
+        <LoadingState label="Loading staff accounts…" />
       ) : staff.length ? (
         <section className="panel management-table-panel">
           <div className="management-table-heading">
@@ -219,9 +219,6 @@ export function StaffManagementPage() {
               <h3>Staff Directory</h3>
               <p>{staff.length} staff records listed</p>
             </div>
-            <span className="live-data-chip">
-              <i /> Live MongoDB
-            </span>
           </div>
           <DataTable columns={columns} rows={staff} />
         </section>

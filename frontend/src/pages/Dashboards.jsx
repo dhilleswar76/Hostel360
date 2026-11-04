@@ -76,7 +76,7 @@ export function AdminDashboard() {
       {error && <p className="management-error">{error}</p>}
 
       {loading ? (
-        <LoadingState label="Computing live statistics from MongoDB…" />
+        <LoadingState label="Computing live statistics…" />
       ) : (
         <>
           <div className="stat-grid admin-stat-grid">
@@ -308,7 +308,7 @@ export function StudentDashboard() {
                 <br />
                 perfectly connected.
               </h2>
-              <p>Manage your room, gate passes, simulated fees, and 24/7 emergency support.</p>
+              <p>Manage your room, gate passes, fee payments, and 24/7 emergency support.</p>
               <span className="hero-profile-line">
                 {profile?.department || profile?.course || "Undergraduate"} · Year {profile?.year || "1"}
               </span>

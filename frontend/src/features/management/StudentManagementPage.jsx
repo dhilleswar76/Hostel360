@@ -286,13 +286,10 @@ export function StudentManagementPage() {
             <h3>Resident Directory</h3>
             <p>{students.length} student records found</p>
           </div>
-          <span className="live-data-chip">
-            <i /> Live MongoDB
-          </span>
         </div>
 
         {loading ? (
-          <LoadingState label="Loading students from database…" />
+          <LoadingState label="Loading students…" />
         ) : error && students.length === 0 ? (
           <EmptyState
             title="Student records unavailable"
@@ -319,7 +316,7 @@ export function StudentManagementPage() {
           subtitle={
             editing
               ? "Update personal, academic, and guardian details."
-              : "Create a student resident account in MongoDB."
+              : "Create a student resident account."
           }
           onClose={() => setFormOpen(false)}
           wide

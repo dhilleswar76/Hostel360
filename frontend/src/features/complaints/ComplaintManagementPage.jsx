@@ -259,7 +259,7 @@ export function ComplaintManagementPage() {
       </div>
 
       {loading ? (
-        <LoadingState label="Loading complaints from MongoDB…" />
+        <LoadingState label="Loading complaints…" />
       ) : rows.length ? (
         <section className="panel management-table-panel">
           <div className="management-table-heading">
@@ -267,9 +267,6 @@ export function ComplaintManagementPage() {
               <h3>{isStudent ? "My Registered Complaints" : "Resident Complaints"}</h3>
               <p>{rows.length} complaints listed</p>
             </div>
-            <span className="live-data-chip">
-              <i /> Live MongoDB
-            </span>
           </div>
           <DataTable columns={columns} rows={rows} />
         </section>

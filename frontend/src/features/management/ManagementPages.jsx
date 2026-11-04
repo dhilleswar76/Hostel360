@@ -135,7 +135,7 @@ export function BlocksPage() {
       <Notice error={error || actionError} success={message} />
 
       {loading ? (
-        <LoadingState label="Loading hostel blocks from MongoDB…" />
+        <LoadingState label="Loading hostel blocks…" />
       ) : data?.length ? (
         <div className="management-grid">
           {data.map((block) => (
@@ -745,7 +745,7 @@ export function StudentProfilePage() {
       {error && <Notice error={error} />}
 
       {loading ? (
-        <LoadingState label="Loading profile from MongoDB…" />
+        <LoadingState label="Loading profile…" />
       ) : profile ? (
         <>
           <div className="profile-banner">
