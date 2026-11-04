@@ -9,7 +9,7 @@ export function getBaseURL() {
       return url;
     }
   }
-  return import.meta.env.VITE_API_BASE_URL || "/api";
+  return import.meta.env.VITE_API_BASE_URL || "https://hostel360-api-tkjp.onrender.com/api";
 }
 
 const api = axios.create({
