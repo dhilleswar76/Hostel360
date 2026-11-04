@@ -144,11 +144,13 @@ router.patch("/:id/review", authorize("admin", "warden"), asyncHandler(async (re
   if (status === "approved") {
     // Generate secure unpredictable token
     const token = `PASS-${Date.now()}-${randomBytes(16).toString("hex").toUpperCase()}`;
+    // Pass is immediately valid upon approval or from start date, whichever is earlier
+    const passStartTime = new Date(Math.min(Date.now(), new Date(leave.startDate).getTime()));
     qrPass = await QRPass.create({
       student: leave.student._id,
       token,
       purpose: leave.leaveType === "local_outing" ? "temporary_exit" : "leave",
-      validFrom: leave.startDate,
+      validFrom: passStartTime,
       expiresAt: leave.endDate,
       status: "active",
       leaveRequest: leave._id,

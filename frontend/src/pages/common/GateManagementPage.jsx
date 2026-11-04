@@ -3,6 +3,7 @@ import api, { getApiError } from "../../lib/api.js";
 import { DataTable, LoadingState, Modal, Panel, SectionHeading, StatusBadge } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
 import { QRCameraModal } from "../../components/QRCameraModal.jsx";
+import { format12HourDateTime, format12HourTime } from "../../lib/dateTime.js";
 
 export function GateManagementPage() {
   const [statusData, setStatusData] = useState({ totalStudents: 0, insideCount: 0, outsideCount: 0, insideStudents: [], outsideStudents: [] });
@@ -103,7 +104,7 @@ export function GateManagementPage() {
     {
       key: "time",
       title: "Timestamp",
-      render: (row) => new Date(row.occurredAt).toLocaleString(),
+      render: (row) => format12HourDateTime(row.occurredAt),
     },
     {
       key: "student",
@@ -229,7 +230,7 @@ export function GateManagementPage() {
                 </div>
                 <div><strong>Resident:</strong> {verifyResult.pass?.student?.user?.name}</div>
                 <div><strong>Purpose:</strong> {verifyResult.pass?.purpose}</div>
-                <div><strong>Valid Range:</strong> {new Date(verifyResult.pass?.validFrom).toLocaleString()} to {new Date(verifyResult.pass?.expiresAt).toLocaleString()}</div>
+                <div><strong>Valid Range:</strong> {format12HourDateTime(verifyResult.pass?.validFrom)} to {format12HourDateTime(verifyResult.pass?.expiresAt)}</div>
                 <div><strong>Pass Status:</strong> {verifyResult.pass?.status}</div>
               </div>
             )}
@@ -324,7 +325,7 @@ export function GateManagementPage() {
                 </span>
                 {s.lastMovement?.time && (
                   <div className="text-[10px] text-slate-400 mt-1">
-                    Since {new Date(s.lastMovement.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    Since {format12HourTime(s.lastMovement.time)}
                   </div>
                 )}
               </div>

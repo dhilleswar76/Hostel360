@@ -3,6 +3,7 @@ import api, { getApiError } from "../../lib/api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { DataTable, LoadingState, Modal, Panel, SectionHeading, StatusBadge } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourDateTime } from "../../lib/dateTime.js";
 
 export function EmergencySOSPage() {
   const { user } = useAuth();
@@ -116,7 +117,7 @@ export function EmergencySOSPage() {
     {
       key: "time",
       title: "Timestamp",
-      render: (row) => new Date(row.createdAt).toLocaleString(),
+      render: (row) => format12HourDateTime(row.createdAt),
     },
     {
       key: "resident",

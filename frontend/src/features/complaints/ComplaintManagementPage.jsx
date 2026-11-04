@@ -4,6 +4,7 @@ import { DataTable, EmptyState, LoadingState, Modal, SectionHeading, StatCard, S
 import { Icon } from "../../components/Icon.jsx";
 import { getApiError } from "../../lib/api.js";
 import api from "../../lib/api.js";
+import { format12HourDateTime } from "../../lib/dateTime.js";
 
 const categories = [
   { value: "electrical", label: "Electricity" },
@@ -361,7 +362,7 @@ export function ComplaintManagementPage() {
             </div>
             <div>
               <span>Submitted</span>
-              <strong>{new Date(selected.createdAt).toLocaleString()}</strong>
+              <strong>{format12HourDateTime(selected.createdAt)}</strong>
             </div>
             <div>
               <span>Assigned staff</span>
@@ -401,10 +402,10 @@ export function ComplaintManagementPage() {
                     fontSize: "12px",
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <strong>{nice(h.status)}</strong>
-                    <span style={{ color: "#94a3b8" }}>{new Date(h.changedAt).toLocaleString()}</span>
-                  </div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <strong>{nice(h.status)}</strong>
+                      <span style={{ color: "#94a3b8" }}>{format12HourDateTime(h.changedAt)}</span>
+                    </div>
                   <p style={{ margin: "2px 0 0 0", color: "#64748b" }}>{h.remark || "Status updated"}</p>
                 </div>
               ))}

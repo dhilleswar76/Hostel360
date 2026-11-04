@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import api, { getApiError } from "../../lib/api.js";
 import { DataTable, LoadingState, Panel, SectionHeading, StatusBadge } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourDateTime, toISOFromLocal } from "../../lib/dateTime.js";
 
 const TYPE_CONFIG = {
   "local-outing": {
@@ -66,6 +67,8 @@ export function StudentLeavePage({ mode = "local-outing" }) {
     try {
       await api.post("/leaves", {
         ...formData,
+        startDate: toISOFromLocal(formData.startDate),
+        endDate: toISOFromLocal(formData.endDate),
         leaveType: config.dbType,
       });
       setSuccessMsg("Leave application submitted successfully! Your warden will review it.");
@@ -102,10 +105,10 @@ export function StudentLeavePage({ mode = "local-outing" }) {
       render: (row) => (
         <div className="text-xs">
           <div className="font-semibold text-slate-900">
-            {new Date(row.startDate).toLocaleString()}
+            {format12HourDateTime(row.startDate)}
           </div>
           <div className="text-slate-500">
-            to {new Date(row.endDate).toLocaleString()}
+            to {format12HourDateTime(row.endDate)}
           </div>
         </div>
       ),

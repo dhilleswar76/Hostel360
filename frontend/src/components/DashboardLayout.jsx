@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { roleNames, roleNavigation } from "../data/dashboardData.js";
 import { Icon } from "./Icon.jsx";
 import api from "../lib/api.js";
+import { format12HourTime } from "../lib/dateTime.js";
 
 export function DashboardLayout({ role }) {
   const { user, logout, success, clearMessages } = useAuth();
@@ -258,7 +259,7 @@ export function DashboardLayout({ role }) {
                           <strong style={{ display: "block", fontSize: "13px" }}>{item.title}</strong>
                           <small style={{ display: "block", color: "#64748b", fontSize: "11px" }}>{item.message}</small>
                           <em style={{ display: "block", color: "#94a3b8", fontSize: "10px", marginTop: "2px" }}>
-                            {new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            {format12HourTime(item.createdAt)}
                           </em>
                         </span>
                       </button>

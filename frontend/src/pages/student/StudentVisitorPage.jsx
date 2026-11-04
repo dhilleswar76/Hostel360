@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api, { getApiError } from "../../lib/api.js";
 import { DataTable, LoadingState, Modal, Panel, SectionHeading, StatusBadge } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourDateTime, toISOFromLocal } from "../../lib/dateTime.js";
 
 export function StudentVisitorPage() {
   const [visitors, setVisitors] = useState([]);
@@ -42,7 +43,10 @@ export function StudentVisitorPage() {
     setSubmitting(true);
     setFormError("");
     try {
-      await api.post("/visitors", formData);
+      await api.post("/visitors", {
+        ...formData,
+        expectedAt: toISOFromLocal(formData.expectedAt),
+      });
       setModalOpen(false);
       setFormData({
         name: "",
@@ -81,7 +85,7 @@ export function StudentVisitorPage() {
       title: "Expected Arrival",
       render: (row) => (
         <span className="text-xs font-medium text-slate-800">
-          {new Date(row.expectedAt).toLocaleString()}
+          {format12HourDateTime(row.expectedAt)}
         </span>
       ),
     },

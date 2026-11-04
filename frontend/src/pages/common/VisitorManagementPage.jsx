@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api, { getApiError } from "../../lib/api.js";
 import { DataTable, LoadingState, Modal, Panel, SectionHeading, StatusBadge } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourDateTime, format12HourTime } from "../../lib/dateTime.js";
 
 export function VisitorManagementPage() {
   const [visitors, setVisitors] = useState([]);
@@ -136,9 +137,9 @@ export function VisitorManagementPage() {
       title: "Expected / Arrival",
       render: (row) => (
         <div className="text-xs">
-          <div>Expected: {new Date(row.expectedAt).toLocaleDateString()}</div>
-          {row.checkedInAt && <div className="text-emerald-700 font-medium">In: {new Date(row.checkedInAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>}
-          {row.checkedOutAt && <div className="text-slate-500">Out: {new Date(row.checkedOutAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>}
+          <div>Expected: {format12HourDateTime(row.expectedAt)}</div>
+          {row.checkedInAt && <div className="text-emerald-700 font-medium">In: {format12HourTime(row.checkedInAt)}</div>}
+          {row.checkedOutAt && <div className="text-slate-500">Out: {format12HourTime(row.checkedOutAt)}</div>}
         </div>
       ),
     },

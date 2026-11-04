@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api, { getApiError } from "../../lib/api.js";
 import { DataTable, LoadingState, Panel, SectionHeading } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourDateTime } from "../../lib/dateTime.js";
 
 export function StudentMovementHistoryPage() {
   const [movements, setMovements] = useState([]);
@@ -31,7 +32,7 @@ export function StudentMovementHistoryPage() {
       title: "Date & Time",
       render: (row) => (
         <span className="text-xs font-semibold text-slate-800">
-          {new Date(row.occurredAt).toLocaleString()}
+          {format12HourDateTime(row.occurredAt)}
         </span>
       ),
     },

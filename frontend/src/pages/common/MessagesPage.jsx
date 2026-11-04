@@ -3,6 +3,7 @@ import api, { getApiError } from "../../lib/api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { LoadingState, SectionHeading } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourTime } from "../../lib/dateTime.js";
 
 export function MessagesPage() {
   const { user } = useAuth();
@@ -162,7 +163,7 @@ export function MessagesPage() {
                             <p className="whitespace-pre-wrap">{m.content}</p>
                           </div>
                           <span className="text-[10px] text-slate-400 mt-1 px-1">
-                            {new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            {format12HourTime(m.createdAt)}
                           </span>
                         </div>
                       );

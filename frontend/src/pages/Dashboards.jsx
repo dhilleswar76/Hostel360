@@ -5,6 +5,7 @@ import { EmptyState, LoadingState, Panel, SectionHeading, StatCard } from "../co
 import { Icon } from "../components/Icon.jsx";
 import { fetchDashboardStats, fetchStudent } from "../features/management/api.js";
 import { getApiError } from "../lib/api.js";
+import { format12HourDateTime } from "../lib/dateTime.js";
 
 const AdminCharts = lazy(() => import("./AdminCharts.jsx"));
 
@@ -398,7 +399,7 @@ export function StudentDashboard() {
                   <strong>{record?.movement?.status === "outside" ? "Currently Outside Hostel" : "Currently Inside Hostel"}</strong>
                   <small>
                     {record?.movement?.occurredAt
-                      ? `Last movement: ${new Date(record.movement.occurredAt).toLocaleString()}`
+                      ? `Last movement: ${format12HourDateTime(record.movement.occurredAt)}`
                       : "No gate movements recorded today."}
                   </small>
                 </div>

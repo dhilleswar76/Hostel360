@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api, { getApiError } from "../../lib/api.js";
 import { LoadingState, Panel, SectionHeading } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourDateTime } from "../../lib/dateTime.js";
 
 export function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -118,7 +119,7 @@ export function NotificationsPage() {
                       </div>
                       <p className="text-xs text-slate-700 mt-1">{n.message}</p>
                       <span className="text-[11px] text-slate-400 mt-2 block">
-                        {new Date(n.createdAt).toLocaleString()}
+                        {format12HourDateTime(n.createdAt)}
                       </span>
                     </div>
                   </div>

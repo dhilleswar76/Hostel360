@@ -4,6 +4,7 @@ import api, { getApiError } from "../../lib/api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { LoadingState, Panel, SectionHeading } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourDateTime } from "../../lib/dateTime.js";
 
 export function StudentQRPassPage() {
   const { user } = useAuth();
@@ -103,13 +104,13 @@ export function StudentQRPassPage() {
             <div>
               <span className="text-slate-500 block">Valid From</span>
               <span className="font-semibold text-slate-800">
-                {new Date(activePass.startDate).toLocaleString()}
+                {format12HourDateTime(activePass.qrPass.validFrom || activePass.startDate)}
               </span>
             </div>
             <div>
               <span className="text-slate-500 block">Valid Until</span>
               <span className="font-semibold text-rose-800">
-                {new Date(activePass.endDate).toLocaleString()}
+                {format12HourDateTime(activePass.qrPass.expiresAt || activePass.endDate)}
               </span>
             </div>
             <div className="col-span-2">

@@ -13,6 +13,7 @@ import User from "../models/User.js";
 import MaintenanceTask from "../models/MaintenanceTask.js";
 import EmergencyAlert from "../models/EmergencyAlert.js";
 import { asyncHandler } from "../utils/http.js";
+import { format12Hour } from "../utils/dateTime.js";
 
 const router = Router();
 
@@ -184,7 +185,7 @@ router.get("/stats", authenticate, authorize("admin", "warden"), asyncHandler(as
     recentActivities: recentActivitiesList.map((m) => ({
       title: `${m.direction === "entry" ? "Student Entry" : "Student Exit"} Recorded`,
       detail: `${m.student?.user?.name || "Student"} - ${m.direction.toUpperCase()}`,
-      time: new Date(m.occurredAt).toLocaleString(),
+      time: format12Hour(m.occurredAt),
       tone: m.direction === "entry" ? "green" : "amber",
       icon: m.direction === "entry" ? "DoorOpen" : "MoveRight",
     })),

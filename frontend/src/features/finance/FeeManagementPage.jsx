@@ -12,6 +12,7 @@ import {
   simulatePayment,
 } from "../management/api.js";
 import api from "../../lib/api.js";
+import { format12HourDateTime } from "../../lib/dateTime.js";
 
 const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 const feeTypes = ["tuition", "accommodation", "mess", "deposit", "fine", "other"];
@@ -450,7 +451,7 @@ export function FeeManagementPage() {
               </div>
               <div>
                 <span>Date & Time</span>
-                <strong>{new Date(receipt.paidAt).toLocaleString()}</strong>
+                <strong>{format12HourDateTime(receipt.paidAt)}</strong>
               </div>
               <div>
                 <span>Status</span>
@@ -513,7 +514,7 @@ export function FeeManagementPage() {
                       </td>
                       <td>{tx.method?.toUpperCase()}</td>
                       <td>{money(tx.amount)}</td>
-                      <td>{new Date(tx.paidAt).toLocaleString()}</td>
+                      <td>{format12HourDateTime(tx.paidAt)}</td>
                       <td>
                         <StatusBadge tone="success">{tx.status}</StatusBadge>
                       </td>

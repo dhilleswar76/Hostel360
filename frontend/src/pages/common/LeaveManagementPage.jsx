@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api, { getApiError } from "../../lib/api.js";
 import { DataTable, LoadingState, Modal, Panel, SectionHeading, StatusBadge } from "../../components/Common.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { format12HourDateTime } from "../../lib/dateTime.js";
 
 export function LeaveManagementPage() {
   const [leaves, setLeaves] = useState([]);
@@ -89,8 +90,9 @@ export function LeaveManagementPage() {
       title: "Dates & Duration",
       render: (row) => (
         <div className="text-xs">
-          <div>{new Date(row.startDate).toLocaleDateString()} to {new Date(row.endDate).toLocaleDateString()}</div>
-          <div className="text-slate-500">Contact: {row.emergencyContact || "N/A"}</div>
+          <div className="font-semibold text-slate-900">{format12HourDateTime(row.startDate)}</div>
+          <div className="text-slate-600">to {format12HourDateTime(row.endDate)}</div>
+          <div className="text-slate-400 mt-0.5">Contact: {row.emergencyContact || "N/A"}</div>
         </div>
       ),
     },
@@ -220,11 +222,11 @@ export function LeaveManagementPage() {
               </div>
               <div>
                 <span className="text-xs text-slate-500 block">From</span>
-                <span className="font-medium">{new Date(selectedLeave.startDate).toLocaleString()}</span>
+                <span className="font-medium">{format12HourDateTime(selectedLeave.startDate)}</span>
               </div>
               <div>
                 <span className="text-xs text-slate-500 block">Until</span>
-                <span className="font-medium">{new Date(selectedLeave.endDate).toLocaleString()}</span>
+                <span className="font-medium">{format12HourDateTime(selectedLeave.endDate)}</span>
               </div>
               <div className="col-span-2">
                 <span className="text-xs text-slate-500 block">Reason</span>

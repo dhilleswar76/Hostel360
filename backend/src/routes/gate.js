@@ -7,6 +7,7 @@ import HostelBlock from "../models/HostelBlock.js";
 import Room from "../models/Room.js";
 import Notification from "../models/Notification.js";
 import { asyncHandler, HttpError, requireObjectId } from "../utils/http.js";
+import { format12Hour, format12HourTimeOnly } from "../utils/dateTime.js";
 
 const router = Router();
 
@@ -105,32 +106,63 @@ router.post("/verify-pass", authorize("admin", "warden"), asyncHandler(async (re
     return res.status(404).json({ valid: false, message: "Invalid QR Pass token. Not found in system." });
   }
 
-  const now = new Date();
-  if (pass.status === "revoked") {
-    return res.status(400).json({ valid: false, message: "This pass has been revoked." });
-  }
-  if (pass.status === "used") {
-    return res.status(400).json({ valid: false, message: "This single-use pass has already been used." });
-  }
-  if (now > new Date(pass.expiresAt)) {
-    pass.status = "expired";
-    await pass.save();
-    return res.status(400).json({ valid: false, message: "This QR Pass has expired." });
-  }
-  if (now < new Date(pass.validFrom)) {
-    return res.status(400).json({ valid: false, message: `This pass is not valid yet (starts at ${new Date(pass.validFrom).toLocaleString()}).` });
-  }
-
   // Find last movement to determine recommended direction
   const lastMovement = await GateMovement.findOne({ student: pass.student._id }).sort({ occurredAt: -1 }).lean();
   const recommendedDirection = lastMovement?.direction === "exit" ? "entry" : "exit";
+
+  const now = new Date();
+  if (pass.status === "revoked") {
+    return res.status(400).json({ valid: false, message: "This pass has been revoked by the hostel administration." });
+  }
+
+  if (pass.status === "used" && recommendedDirection !== "entry") {
+    return res.status(400).json({
+      valid: false,
+      message: `This single-use pass was already completed on ${format12Hour(pass.usedAt || pass.updatedAt)}.`,
+    });
+  }
+
+  // Verification for ENTRY (returning student):
+  // Never lock a returning resident out of campus. If late, allow entry with late notice.
+  let isDelayed = false;
+  if (recommendedDirection === "entry") {
+    if (now > new Date(pass.expiresAt)) {
+      isDelayed = true;
+    }
+  } else {
+    // Verification for EXIT (student departing campus):
+    // Allow departure up to 12 hours before scheduled departure on the approved day
+    const earlyDepartureBufferMs = 12 * 60 * 60 * 1000;
+    const startThreshold = new Date(new Date(pass.validFrom).getTime() - earlyDepartureBufferMs);
+
+    if (now.getTime() < startThreshold.getTime()) {
+      return res.status(400).json({
+        valid: false,
+        message: `This pass is scheduled for ${format12Hour(pass.validFrom)}. Early departure is allowed on the scheduled day.`,
+      });
+    }
+
+    // Check if expired for departure
+    const departureGraceMs = 4 * 60 * 60 * 1000; // 4 hour grace window past scheduled exit
+    if (now.getTime() > new Date(pass.expiresAt).getTime() + departureGraceMs) {
+      pass.status = "expired";
+      await pass.save();
+      return res.status(400).json({
+        valid: false,
+        message: `This pass expired on ${format12Hour(pass.expiresAt)}. Please apply for a fresh leave pass.`,
+      });
+    }
+  }
 
   res.json({
     valid: true,
     pass,
     student: pass.student,
     recommendedDirection,
-    message: "QR Pass verified successfully.",
+    isDelayed,
+    message: isDelayed
+      ? `QR Pass verified. Resident is returning past scheduled curfew (${format12Hour(pass.expiresAt)}).`
+      : "QR Pass verified successfully.",
   });
 }));
 
@@ -151,7 +183,7 @@ router.post("/record-movement", authorize("admin", "warden"), asyncHandler(async
   if (passToken) {
     passDoc = await QRPass.findOne({ token: passToken }).select("+token");
     if (passDoc) {
-      if (direction === "entry" && passDoc.purpose === "leave") {
+      if (direction === "entry") {
         passDoc.status = "used";
         passDoc.usedAt = new Date();
         await passDoc.save();
@@ -168,11 +200,11 @@ router.post("/record-movement", authorize("admin", "warden"), asyncHandler(async
     notes: notes ? String(notes).trim() : undefined,
   });
 
-  // Notify student
+  // Notify student with 12-hour timestamp
   await Notification.create({
     user: student.user,
     title: `Campus ${direction === "entry" ? "Entry" : "Exit"} Recorded`,
-    message: `A gate movement of type "${direction.toUpperCase()}" was recorded at ${new Date().toLocaleTimeString()}.`,
+    message: `A gate movement of type "${direction.toUpperCase()}" was recorded at ${format12HourTimeOnly(new Date())}.`,
     type: "system",
   }).catch(() => null);
 
@@ -186,11 +218,12 @@ router.get("/my-pass", authorize("student"), asyncHandler(async (req, res) => {
   const student = await Student.findOne({ user: req.auth.sub });
   if (!student) throw new HttpError(404, "Student not found.");
 
-  const now = new Date();
+  // Keep pass available for 24 hours past scheduled expiry so returning students can always present it
+  const graceWindow = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const activePass = await QRPass.findOne({
     student: student._id,
-    status: "active",
-    expiresAt: { $gte: now },
+    status: { $in: ["active", "expired"] },
+    expiresAt: { $gte: graceWindow },
   })
     .select("+token")
     .populate("leaveRequest")
