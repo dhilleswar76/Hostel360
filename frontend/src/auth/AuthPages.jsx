@@ -169,31 +169,23 @@ export function LoginPage() {
       </div>
 
       <div className="demo-credentials-banner" style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "10px 14px", borderRadius: "8px", marginBottom: "16px", fontSize: "12px" }}>
-        <p style={{ fontWeight: 600, color: "#475569", marginBottom: "6px" }}>Demo Accounts (Quick Select):</p>
+        <p style={{ fontWeight: 600, color: "#475569", marginBottom: "6px" }}>Demo Credentials (Quick Select):</p>
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           <button
             type="button"
             className="secondary-button"
-            style={{ padding: "4px 8px", fontSize: "11px" }}
-            onClick={() => fillDemo("admin@hostel360.dev", "Admin@Hostel360")}
-          >
-            Admin
-          </button>
-          <button
-            type="button"
-            className="secondary-button"
-            style={{ padding: "4px 8px", fontSize: "11px" }}
+            style={{ padding: "4px 10px", fontSize: "11px", fontWeight: 600 }}
             onClick={() => fillDemo("warden@hostel360.dev", "Warden@Hostel360")}
           >
-            Warden
+            Staff / Warden
           </button>
           <button
             type="button"
             className="secondary-button"
-            style={{ padding: "4px 8px", fontSize: "11px" }}
+            style={{ padding: "4px 10px", fontSize: "11px", fontWeight: 600 }}
             onClick={() => fillDemo("student@hostel360.dev", "Student@Hostel360")}
           >
-            Student
+            Student Resident
           </button>
         </div>
       </div>
@@ -254,6 +246,116 @@ export function LoginPage() {
       </div>
       <p className="auth-bottom-link">
         Are you a student? <Link to="/register">Create an account <Icon name="ArrowUpRight" size={14} /></Link>
+      </p>
+    </AuthFrame>
+  );
+}
+
+export function AdminLoginPage() {
+  const { user, loading: sessionLoading, login, error, success, clearMessages } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  if (sessionLoading) {
+    return (
+      <main className="auth-loading">
+        <span className="spinner" />
+        Authenticating administrative session…
+      </main>
+    );
+  }
+  if (user) {
+    if (user.role === "admin") return <Navigate to="/admin" replace />;
+    return <Navigate to={rolePath[user.role]} replace />;
+  }
+
+  async function submit(event) {
+    event.preventDefault();
+    clearMessages();
+    setSubmitting(true);
+    try {
+      const data = await login(email, password);
+      if (data?.user?.role !== "admin") {
+        navigate(rolePath[data.user.role] || "/", { replace: true });
+        return;
+      }
+      navigate("/admin", { replace: true });
+    } catch {
+      // Handled in context
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <AuthFrame mode="admin-login">
+      <div className="auth-heading">
+        <span className="form-eyebrow" style={{ color: "#e11d48", fontWeight: 700 }}>
+          🔒 RESTRICTED CONSOLE
+        </span>
+        <h2>System Administration</h2>
+        <p>Enter your master administrator credentials to access HOSTEL360.</p>
+      </div>
+
+      <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", padding: "12px 14px", borderRadius: "8px", marginBottom: "18px", fontSize: "12px", color: "#9f1239" }}>
+        <strong>Administrative Notice:</strong> This terminal is reserved strictly for authorized hostel administrators. Direct credential input is required.
+      </div>
+
+      <form className="auth-form" onSubmit={submit}>
+        <label className="form-label">
+          Admin Email Address
+          <span className="input-control">
+            <Icon name="ShieldCheck" size={17} />
+            <input
+              name="email"
+              type="email"
+              autoComplete="username"
+              required
+              maxLength={254}
+              placeholder="admin@hostel360.dev"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </span>
+        </label>
+        <PasswordInput
+          name="password"
+          label="Admin Password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {error && (
+          <p className="auth-message error" role="alert">
+            <Icon name="CircleAlert" size={17} />
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="auth-message success" role="status">
+            <Icon name="CheckCircle2" size={17} />
+            {success}
+          </p>
+        )}
+
+        <button className="auth-submit" type="submit" disabled={submitting} style={{ background: "#0f172a" }}>
+          {submitting ? (
+            <>
+              <span className="button-spinner" />
+              Verifying Credentials…
+            </>
+          ) : (
+            <>
+              Access Administrator Console <Icon name="ArrowUpRight" size={16} />
+            </>
+          )}
+        </button>
+      </form>
+      <p className="auth-bottom-link" style={{ marginTop: "16px", textAlign: "center" }}>
+        <Link to="/login" style={{ color: "#64748b", fontSize: "12px" }}>← Back to Resident & Staff Portal</Link>
       </p>
     </AuthFrame>
   );

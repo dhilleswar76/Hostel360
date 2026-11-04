@@ -1,13 +1,26 @@
 import axios from "axios";
 
+export function getBaseURL() {
+  if (typeof window !== "undefined") {
+    const override = localStorage.getItem("hostel360_api_url");
+    if (override && override.trim()) {
+      let url = override.trim().replace(/\/+$/, "");
+      if (!url.endsWith("/api")) url += "/api";
+      return url;
+    }
+  }
+  return import.meta.env.VITE_API_BASE_URL || "/api";
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  baseURL: getBaseURL(),
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 api.interceptors.request.use((config) => {
+  config.baseURL = getBaseURL();
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -20,7 +33,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401 && !error.config.url.includes("/auth/login")) {
       localStorage.removeItem("token");
-      if (window.location.pathname !== "/login") {
+      if (window.location.pathname !== "/login" && window.location.pathname !== "/admin-login" && window.location.pathname !== "/admin-portal") {
         window.location.href = "/login";
       }
     }
@@ -30,7 +43,14 @@ api.interceptors.response.use(
 
 export function getApiError(error, fallback = "An unexpected error occurred.") {
   if (axios.isAxiosError(error)) {
-    return error.response?.data?.error || error.response?.data?.message || fallback;
+    if (error.response?.data?.error) return error.response.data.error;
+    if (error.response?.data?.message) return error.response.data.message;
+    if (error.code === "ERR_NETWORK") {
+      return "Unable to reach backend server. If using Render free tier, the server may take ~30–45s to wake up from idle sleep. Please retry in a moment.";
+    }
+    if (error.response?.status === 404) {
+      return "Backend API route not found (404). Ensure VITE_API_BASE_URL points to your backend URL with /api.";
+    }
   }
   if (error instanceof Error) {
     return error.message;
@@ -39,4 +59,3 @@ export function getApiError(error, fallback = "An unexpected error occurred.") {
 }
 
 export default api;
-

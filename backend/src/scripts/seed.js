@@ -29,10 +29,15 @@ export async function runSeed() {
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
-  // 2. Warden
+  // 2. Warden & Staff
   const warden = await User.findOneAndUpdate(
     { email: "warden@hostel360.dev" },
     { $setOnInsert: { name: "Prof. Rajesh Verma", email: "warden@hostel360.dev", password: wardenPassword, role: "warden", phone: "+91 98765 00002", isActive: true } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  await User.findOneAndUpdate(
+    { email: "staff@hostel360.dev" },
+    { $setOnInsert: { name: "Hostel Staff & Warden", email: "staff@hostel360.dev", password: wardenPassword, role: "warden", phone: "+91 98765 00004", isActive: true } },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
   await User.findOneAndUpdate(

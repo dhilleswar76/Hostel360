@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ForbiddenPage } from "./auth/AuthHome.jsx";
-import { LoginPage, RegisterPage } from "./auth/AuthPages.jsx";
+import { LoginPage, RegisterPage, AdminLoginPage } from "./auth/AuthPages.jsx";
 import { ProtectedRoute } from "./auth/ProtectedRoute.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import { DashboardLayout } from "./components/DashboardLayout.jsx";
@@ -64,6 +64,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/admin-login" element={<AdminLoginPage />} />
+      <Route path="/admin-portal" element={<AdminLoginPage />} />
+      <Route path="/super-admin" element={<AdminLoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
       <Route element={<ProtectedRoute />}>
