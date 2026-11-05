@@ -1,15 +1,22 @@
 import axios from "axios";
 
 export function getBaseURL() {
+  let rawUrl = "";
   if (typeof window !== "undefined") {
     const override = localStorage.getItem("hostel360_api_url");
     if (override && override.trim()) {
-      let url = override.trim().replace(/\/+$/, "");
-      if (!url.endsWith("/api")) url += "/api";
-      return url;
+      rawUrl = override.trim();
     }
   }
-  return import.meta.env.VITE_API_BASE_URL || "https://hostel360-api-tkjp.onrender.com/api";
+  if (!rawUrl) {
+    rawUrl = (import.meta.env.VITE_API_BASE_URL || "https://hostel360-api-tkjp.onrender.com/api").trim();
+  }
+
+  let url = rawUrl.replace(/\/+$/, "");
+  if (!url.endsWith("/api")) {
+    url += "/api";
+  }
+  return url;
 }
 
 const api = axios.create({
