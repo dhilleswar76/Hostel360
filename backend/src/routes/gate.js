@@ -166,8 +166,13 @@ router.post("/verify-pass", authorize("admin", "warden"), asyncHandler(async (re
   });
 }));
 
-router.post("/record-movement", authorize("admin", "warden"), asyncHandler(async (req, res) => {
-  const { studentId, direction, passToken, notes } = req.body || {};
+const recordMovementHandler = asyncHandler(async (req, res) => {
+  const body = req.body || {};
+  const studentId = body.studentId || body.student;
+  const direction = body.direction;
+  const passToken = body.passToken;
+  const notes = body.notes || body.remarks;
+
   if (!studentId || !direction) {
     throw new HttpError(400, "Student ID and direction (entry or exit) are required.");
   }
@@ -212,7 +217,10 @@ router.post("/record-movement", authorize("admin", "warden"), asyncHandler(async
     message: `Gate ${direction} recorded successfully.`,
     movement,
   });
-}));
+});
+
+router.post("/record-movement", authorize("admin", "warden"), recordMovementHandler);
+router.post("/movement", authorize("admin", "warden"), recordMovementHandler);
 
 router.get("/my-pass", authorize("student"), asyncHandler(async (req, res) => {
   const student = await Student.findOne({ user: req.auth.sub });

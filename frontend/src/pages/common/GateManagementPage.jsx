@@ -60,6 +60,9 @@ export function GateManagementPage() {
       if (res.data?.pass?.student?._id) {
         setMovementStudentId(res.data.pass.student._id);
       }
+      if (res.data?.recommendedDirection) {
+        setMovementDirection(res.data.recommendedDirection);
+      }
     } catch (err) {
       setVerifyError(getApiError(err, "QR pass verification failed."));
     } finally {
@@ -83,9 +86,11 @@ export function GateManagementPage() {
     try {
       await api.post("/gate/movement", {
         student: movementStudentId,
+        studentId: movementStudentId,
         direction: movementDirection,
         passToken: tokenInput.trim() || undefined,
         remarks: movementRemarks.trim() || undefined,
+        notes: movementRemarks.trim() || undefined,
       });
       setRecordMessage(`Movement (${movementDirection.toUpperCase()}) recorded successfully!`);
       setTokenInput("");
@@ -140,7 +145,7 @@ export function GateManagementPage() {
     {
       key: "remarks",
       title: "Remarks",
-      render: (row) => <span className="text-xs text-slate-600">{row.remarks || "—"}</span>,
+      render: (row) => <span className="text-xs text-slate-600">{row.remarks || row.notes || "—"}</span>,
     },
     {
       key: "officer",

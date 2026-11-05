@@ -49,7 +49,10 @@ export function getApiError(error, fallback = "An unexpected error occurred.") {
       return "Unable to reach backend server. If using Render free tier, the server may take ~30–45s to wake up from idle sleep. Please retry in a moment.";
     }
     if (error.response?.status === 404) {
-      return "Backend API route not found (404). Ensure VITE_API_BASE_URL points to your backend URL with /api.";
+      if (typeof error.response?.data === "string" && error.response.data.includes("Cannot ")) {
+        return error.response.data.replace(/<[^>]*>/g, "").trim();
+      }
+      return "Requested API endpoint not found (404).";
     }
   }
   if (error instanceof Error) {
